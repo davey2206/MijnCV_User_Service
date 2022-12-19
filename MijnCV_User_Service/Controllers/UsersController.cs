@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using MijnCV_API.Models;
 using MijnCV_User_Service.Models;
+using MijnCV_User_Service.Services;
 
 namespace MijnCV_User_Service.Controllers
 {
@@ -14,25 +14,25 @@ namespace MijnCV_User_Service.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly MijnCV_User_ServiceContext _context;
+        private readonly IUserService _UserService;
 
-        public UsersController(MijnCV_User_ServiceContext context)
+        public UsersController(IUserService service)
         {
-            _context = context;
+            _UserService = service;
         }
 
         // GET: api/Users
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUser()
+        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
-            return await _context.Users.ToListAsync();
+            return await _UserService.GetUsers();
         }
 
         // GET: api/Users/5
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUser(int id)
         {
-            var user = await _context.Users.FindAsync(id);
+            var user = await _UserService.GetUser(id);
 
             if (user == null)
             {
@@ -52,22 +52,9 @@ namespace MijnCV_User_Service.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(user).State = EntityState.Modified;
-
-            try
+            if (_UserService.PutUser(id, user).Result)
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return NotFound();
             }
 
             return NoContent();
@@ -78,8 +65,7 @@ namespace MijnCV_User_Service.Controllers
         [HttpPost]
         public async Task<ActionResult<User>> PostUser(User user)
         {
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+            await _UserService.PostUser(user);
 
             return CreatedAtAction("GetUser", new { id = user.Id }, user);
         }
@@ -88,21 +74,12 @@ namespace MijnCV_User_Service.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
+            if (_UserService.DeleteUser(id).Result)
             {
                 return NotFound();
             }
 
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
-
             return NoContent();
-        }
-
-        private bool UserExists(int id)
-        {
-            return _context.Users.Any(e => e.Id == id);
         }
     }
 }

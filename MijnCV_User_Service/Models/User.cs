@@ -1,4 +1,4 @@
-﻿namespace MijnCV_API.Models
+﻿namespace MijnCV_User_Service.Models
 {
     public class User
     {

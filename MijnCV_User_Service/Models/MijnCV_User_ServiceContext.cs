@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using MijnCV_API.Models;
+using MijnCV_User_Service.Models;
 
 namespace MijnCV_User_Service.Models
 {
