@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using MijnCV_User_Service.Models;
+using MijnCV_User_Service.Services;
 using System;
+using System.ComponentModel.Design;
 using System.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +15,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddDbContext<MijnCV_User_ServiceContext>(opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("DBConnection")));
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: MyAllowSpecificOrigins, policy => {
