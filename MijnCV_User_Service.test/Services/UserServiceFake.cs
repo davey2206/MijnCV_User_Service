@@ -16,8 +16,8 @@ namespace MijnCV_User_Service.test.Services
         {
             _user = new List<User>()
             {
-                new User { Id = 1, CV = "TestCV1", SubID = 12345},
-                new User { Id = 2, CV = "TestCV2", SubID = 54321}
+                new User { Id = 1, CV = "TestCV1", Email = "12345"},
+                new User { Id = 2, CV = "TestCV2", Email = "54321"}
             };
         }
 
@@ -65,7 +65,7 @@ namespace MijnCV_User_Service.test.Services
             }
 
             _user.First(p => p.Id == id).CV = user.CV;
-            _user.First(p => p.Id == id).SubID = user.SubID;
+            _user.First(p => p.Id == id).Email = user.Email;
 
             return Task.FromResult(false);
         }

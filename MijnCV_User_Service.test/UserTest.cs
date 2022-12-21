@@ -26,8 +26,8 @@ namespace MijnCV_User_Service.test
         {
             var expected = new List<User>()
             {
-                new User { Id = 1, CV = "TestCV1", SubID = 12345},
-                new User { Id = 2, CV = "TestCV2", SubID = 54321}
+                new User { Id = 1, CV = "TestCV1", Email = "12345"},
+                new User { Id = 2, CV = "TestCV2", Email = "54321"}
             };
 
             var Result = _controller.GetUsers();
@@ -40,7 +40,7 @@ namespace MijnCV_User_Service.test
         [Fact]
         public void GetUsersTest()
         {
-            User expected = new User { Id = 1, CV = "TestCV1", SubID = 12345 };
+            User expected = new User { Id = 1, CV = "TestCV1", Email = "12345" };
             var Result = _controller.GetUser(1);
 
             Assert.NotNull(Result);
@@ -53,7 +53,7 @@ namespace MijnCV_User_Service.test
         {
             var expected = new List<User>()
             {
-                new User { Id = 1, CV = "TestCV1", SubID = 12345},
+                new User { Id = 1, CV = "TestCV1", Email = "12345"},
             };
 
             var result = _service.DeleteUser(1);
@@ -74,12 +74,12 @@ namespace MijnCV_User_Service.test
         {
             var expected = new List<User>()
             {
-                new User { Id = 1, CV = "TestCV1", SubID = 12345},
-                new User { Id = 2, CV = "TestCV2", SubID = 54321},
-                new User { Id = 3, CV = "TestCV3", SubID = 11111}
+                new User { Id = 1, CV = "TestCV1", Email = "12345"},
+                new User { Id = 2, CV = "TestCV2", Email = "54321"},
+                new User { Id = 3, CV = "TestCV3", Email = "11111"}
             };
 
-            User User = new User { Id = 3, CV = "TestCV3", SubID = 11111 };
+            User User = new User { Id = 3, CV = "TestCV3", Email = "11111" };
 
             var result = _service.PostUser(User);
             var test = _controller.GetUsers();
