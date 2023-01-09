@@ -15,5 +15,7 @@ namespace MijnCV_User_Service.Models
         }
 
         public DbSet<User> Users { get; set; } = default!;
+
+        public DbSet<Statistics> Statistics { get; set; }
     }
 }
