@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using MijnCV_User_Service.Controllers;
 using MijnCV_User_Service.Models;
 using MijnCV_User_Service.test.Services;
@@ -66,7 +67,15 @@ namespace MijnCV_User_Service.test
         [Fact]
         public void PutUserTest()
         {
+            User expected = new User { Id = 1, CV = "TestCV", Email = "69" };
+            User user = new User() { Id = 1, CV = "TestCV", Email = "69" };
 
+            var Result = _service.PutUser(1, user);
+            var Result2 = _controller.GetUser(1);
+
+            Assert.NotNull(Result);
+            Assert.IsType<Task<bool>>(Result);
+            Result2.Result.Value.Should().Equals(expected);
         }
 
         [Fact]
