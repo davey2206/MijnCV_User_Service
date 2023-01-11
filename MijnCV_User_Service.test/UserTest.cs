@@ -1,100 +1,110 @@
-﻿using FluentAssertions;
+﻿using Moq;
+using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using MijnCV_User_Service.Controllers;
 using MijnCV_User_Service.Models;
-using MijnCV_User_Service.test.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MijnCV_User_Service.Services;
 
 namespace MijnCV_User_Service.test
 {
     public class UserTest
     {
-        private readonly UsersController _controller;
-        private readonly UserServiceFake _service;
+        private readonly Mock<IUserService> _service;
         public UserTest()
         {
-            _service = new UserServiceFake();
-            _controller = new UsersController(_service);
+            _service = new Mock<IUserService>();
         }
 
         [Fact]
         public void GetAllUsersTest()
         {
-            var expected = new List<User>()
-            {
-                new User { Id = 1, CV = "TestCV1", Email = "12345"},
-                new User { Id = 2, CV = "TestCV2", Email = "54321"}
-            };
+            var data = GetUserData();
+            _service.Setup(x => x.GetUsers()).Returns(async () => data);
+            var controller = new UsersController(_service.Object);
 
-            var Result = _controller.GetUsers();
+            var Result = controller.GetUsers();
 
             Assert.NotNull(Result);
             Assert.IsType<Task<ActionResult<IEnumerable<User>>>>(Result);
-            Result.Result.Value.Should().Equals(expected);
+            Result.Result.Value.Should().Equals(data);
         }
 
         [Fact]
         public void GetUsersTest()
         {
-            User expected = new User { Id = 1, CV = "TestCV1", Email = "12345" };
-            var Result = _controller.GetUser(1);
+            var data = GetUserData();
+            _service.Setup(x => x.GetUser(1)).Returns(async () => data[0]);
+            var controller = new UsersController(_service.Object);
+
+            var Result = controller.GetUser(1);
 
             Assert.NotNull(Result);
             Assert.IsType<Task<ActionResult<User>>>(Result);
-            Result.Result.Value.Should().Equals(expected);
+            Result.Result.Value.Should().Equals(data[0]);
         }
 
         [Fact]
         public void DeleteUserTest()
         {
-            var expected = new List<User>()
-            {
-                new User { Id = 1, CV = "TestCV1", Email = "12345"},
-            };
+            var data = GetUserData();
+            _service.Setup(x => x.DeleteUser(1)).Returns(async () => true);
+            var controller = new UsersController(_service.Object);
 
-            var result = _service.DeleteUser(1);
-            var test = _controller.GetUsers();
+            var Result = controller.DeleteUser(1);
+            var Result2 = controller.GetUsers();
 
-            Assert.IsType<Task<bool>>(result);
-            test.Result.Value.Should().Equals(expected);
+            Assert.NotNull(Result);
+            Result2.Result.Value.Should().Equals(data);
         }
 
         [Fact]
         public void PutUserTest()
         {
-            User expected = new User { Id = 1, CV = "TestCV", Email = "69" };
             User user = new User() { Id = 1, CV = "TestCV", Email = "69" };
 
-            var Result = _service.PutUser(1, user);
-            var Result2 = _controller.GetUser(1);
+            var data = GetUserData();
+            _service.Setup(x => x.PutUser(1, user)).Returns(async () => true);
+            var controller = new UsersController(_service.Object);
+
+            var Result = controller.PutUser(1, user);
+            var Result2 = controller.GetUser(1);
 
             Assert.NotNull(Result);
-            Assert.IsType<Task<bool>>(Result);
-            Result2.Result.Value.Should().Equals(expected);
+            Result2.Result.Value.Should().Equals(data[0]);
         }
 
         [Fact]
         public void PostUserTest()
         {
-            var expected = new List<User>()
-            {
-                new User { Id = 1, CV = "TestCV1", Email = "12345"},
-                new User { Id = 2, CV = "TestCV2", Email = "54321"},
-                new User { Id = 3, CV = "TestCV3", Email = "11111"}
-            };
-
             User User = new User { Id = 3, CV = "TestCV3", Email = "11111" };
 
-            var result = _service.PostUser(User);
-            var test = _controller.GetUsers();
+            var data = GetUserData();
+            _service.Setup(x => x.PostUser(User)).Returns(async () => data);
+            var controller = new UsersController(_service.Object);
 
-            Assert.IsType<Task<User>>(result);
-            test.Result.Value.Should().Equals(expected);
+            var Result = controller.PostUser(User);
+            var Result2 = controller.GetUsers();
+
+            Assert.NotNull(Result);
+            Assert.IsType<Task<ActionResult<User>>>(Result);
+            Result2.Result.Value.Should().Equals(data);
+        }
+
+        public List<User> GetUserData()
+        {
+            List<User> user = new List<User>()
+            {
+                new User { Id = 1, CV = "TestCV1", Email = "12345"},
+                new User { Id = 2, CV = "TestCV2", Email = "54321"}
+            };
+
+            return user;
         }
     }
 }

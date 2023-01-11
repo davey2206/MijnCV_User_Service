@@ -1,37 +1,38 @@
-﻿using FluentAssertions;
+﻿using Moq;
+using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using MijnCV_User_Service.Controllers;
 using MijnCV_User_Service.Models;
-using MijnCV_User_Service.test.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MijnCV_User_Service.Services;
 
 namespace MijnCV_User_Service.test
 {
     public class StatisticsTest
     {
-        private readonly StatisticsController _controller;
-        private readonly StatisticsServiceFake _service;
+        private readonly Mock<IStatisticsService> _service;
 
         public StatisticsTest()
         {
-            _service = new StatisticsServiceFake();
-            _controller = new StatisticsController(_service);
+            _service = new Mock<IStatisticsService>();
         }
 
         [Fact]
         public void GetStatisticsByCvTest()
         {
-            var expected = new Statistics { Id = 1, cv = "test", Views = 5 };
+            var data = GetStatisticsData();
+            _service.Setup(x => x.GetStatisticsByCv("test")).Returns(async () => data[0] );
+            var controller = new StatisticsController(_service.Object);
 
-            var Result = _controller.GetStatistics("test");
+            var Result = controller.GetStatistics("test");
 
             Assert.IsType<Task<ActionResult<Statistics>>>(Result);
             Assert.NotNull(Result);
-            Result.Result.Value.Should().Equals(expected);
+            Result.Result.Value.Should().Equals(data[0]);
         }
 
         [Fact]
@@ -39,7 +40,11 @@ namespace MijnCV_User_Service.test
         {
             var expected = new Statistics { cv = "test2", Views = 0 };
 
-            var Result = _controller.GetStatistics("test2");
+            var data = GetStatisticsData();
+            _service.Setup(x => x.GetStatisticsByCv("test2")).Returns(async () => new Statistics { cv = "test2", Views = 0});
+            var controller = new StatisticsController(_service.Object);
+
+            var Result = controller.GetStatistics("test");
 
             Assert.IsType<Task<ActionResult<Statistics>>>(Result);
             Assert.NotNull(Result);
@@ -49,29 +54,42 @@ namespace MijnCV_User_Service.test
         [Fact]
         public void UpdateStatisticsViewsFirstTime()
         {
-            var expected = new Statistics { Id = 2, cv = "test2", Views = 1 };
+            var data = GetStatisticsData();
+            _service.Setup(x => x.UpdateViewCountByCv("test2")).Returns(async () => data);
+            var controller = new StatisticsController(_service.Object);
 
-            _controller.UpdateViewCountByCv("test2");
-
-            var Result = _controller.GetStatistics("test2");
+            controller.UpdateViewCountByCv("test2");
+            var Result = controller.GetStatistics("test2");
 
             Assert.IsType<Task<ActionResult<Statistics>>>(Result);
             Assert.NotNull(Result);
-            Result.Result.Value.Should().Equals(expected);
+            Result.Result.Value.Should().Equals(data);
         }
 
         [Fact]
         public void UpdateStatisticsViews()
         {
-            var expected = new Statistics { Id = 1, cv = "test", Views = 6 };
+            var data = GetStatisticsData();
+            _service.Setup(x => x.UpdateViewCountByCv("test")).Returns(async () => data);
+            var controller = new StatisticsController(_service.Object);
 
-            _controller.UpdateViewCountByCv("test");
-
-            var Result = _controller.GetStatistics("test");
+            controller.UpdateViewCountByCv("test");
+            var Result = controller.GetStatistics("test");
 
             Assert.IsType<Task<ActionResult<Statistics>>>(Result);
             Assert.NotNull(Result);
-            Result.Result.Value.Should().Equals(expected);
+            Result.Result.Value.Should().Equals(data);
+        }
+
+        public List<Statistics> GetStatisticsData()
+        {
+            List<Statistics> statisticsData = new List<Statistics>()
+            {
+                new Statistics() { Id = 1, cv="test", Views = 5}
+            }; 
+            
+            return statisticsData;
+
         }
     }
 }
